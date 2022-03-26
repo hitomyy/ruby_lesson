@@ -1,0 +1,41 @@
+version: '3'
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: /bin/sh -c 'rm -f /var/app/current/tmp/pids/server.pid && bundle exec rails s -p 80 -b '0.0.0.0''
+    tty: true
+    stdin_open: true
+    environment:
+      - RAILS_DB_HOST=db
+      - RAILS_DB_PASSWORD=postgres
+      - RAILS_DB_USERNAME=postgres
+      - RAILS_ENV=development
+      - RAILS_SERVE_STATIC_FILES=1
+      - RAILS_MAX_THREADS=2
+      - SECRET_KEY_BASE=hogehoge
+      - WEB_CONCURRENCY=1
+      - MAILER_URL=localhost:8080
+      - ENVIRONMENT=LOCAL
+    volumes:
+      - .:/var/app/current
+      - bundle:/usr/local/bundle
+      - ./log:/var/log
+    ports:
+      - '8080:80'
+    depends_on:
+      - db
+  db:
+    image: postgres:10.1
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres:/var/lib/postgresql/data
+volumes:
+  bundle:
+  postgres:
+    driver: local
